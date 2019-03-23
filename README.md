@@ -106,6 +106,7 @@ Options:
   -z, --analyze TEXT   analyze file
   -s, --scantime TEXT  time in seconds to scan
   -o, --out TEXT       output cellphone data to file
+  --summaryfile TEXT   output summary data of how many devices detected at rssi > -70
   -v, --verbose        verbose mode
   --number             just print the number
   -j, --jsonprint      print JSON of cellphone data

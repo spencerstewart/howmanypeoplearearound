@@ -64,6 +64,7 @@ def fileToMacSet(path):
 @click.option('-z', '--analyze', default='', help='analyze file')
 @click.option('-s', '--scantime', default='60', help='time in seconds to scan')
 @click.option('-o', '--out', default='', help='output cellphone data to file')
+@click.option('--summaryfile', default='', help='output summary data to file')
 @click.option('-d', '--dictionary', default='oui.txt', help='OUI dictionary')
 @click.option('-v', '--verbose', help='verbose mode', is_flag=True)
 @click.option('--number', help='just print the number', is_flag=True)
@@ -77,20 +78,20 @@ def fileToMacSet(path):
 @click.option('--sort', help='sort cellphone data by distance (rssi)', is_flag=True)
 @click.option('--targetmacs', help='read a file that contains target MAC addresses', default='')
 @click.option('-f', '--pcap', help='read a pcap file instead of capturing')
-def main(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out, allmacaddresses, manufacturers, nocorrection, loop, analyze, port, sort, targetmacs, pcap):
+def main(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out, summaryfile, allmacaddresses, manufacturers, nocorrection, loop, analyze, port, sort, targetmacs, pcap):
     if analyze != '':
         analyze_file(analyze, port)
         return
     if loop:
         while True:
             adapter = scan(adapter, scantime, verbose, dictionary, number,
-                 nearby, jsonprint, out, allmacaddresses, manufacturers, nocorrection, loop, sort, targetmacs, pcap)
+                 nearby, jsonprint, out, summaryfile, allmacaddresses, manufacturers, nocorrection, loop, sort, targetmacs, pcap)
     else:
         scan(adapter, scantime, verbose, dictionary, number,
-             nearby, jsonprint, out, allmacaddresses, manufacturers, nocorrection, loop, sort, targetmacs, pcap)
+             nearby, jsonprint, out, summaryfile, allmacaddresses, manufacturers, nocorrection, loop, sort, targetmacs, pcap)
 
 
-def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out, allmacaddresses, manufacturers, nocorrection, loop, sort, targetmacs, pcap):
+def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out, summaryfile, allmacaddresses, manufacturers, nocorrection, loop, sort, targetmacs, pcap):
     """Monitor wifi signals to count the number of people around you"""
 
     # print("OS: " + os.name)
@@ -243,6 +244,7 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
 
     cellphone_people = []
     count_within_70db = 0;
+    timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     for mac in foundMacs:
         oui_id = 'Not in OUI'
         if mac[:8] in oui:
@@ -259,7 +261,6 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
         cellphone_people.sort(key=lambda x: x['rssi'], reverse=True)
     if verbose:
         print(json.dumps(cellphone_people, indent=2))
-        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         print('count: %s, time: %s' % (count_within_70db, timestamp))
 
     # US / Canada: https://twitter.com/conradhackett/status/701798230619590656
@@ -280,6 +281,11 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
             print("No one around, but you.")
         else:
             print("There are about %d people around." % num_people)
+
+    if summaryfile:
+        with open(summaryfile, 'a') as f:
+            data_dump = {'count': count_within_70db, 'time': timestamp}
+            f.write(json.dumps(data_dump) + "\n")
 
     if out:
         with open(out, 'a') as f:
