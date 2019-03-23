@@ -146,13 +146,11 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
             t1.start()
 
         dump_file = '/tmp/tshark-temp'
-        probe_filter = 'type mgt subtype probe-req'
+        capture_filter = 'type mgt subtype probe-req'
         # Scan with tshark
-        # command = [tshark, '-I', '-i', adapter, '-a',
-        #            'duration:' + scantime, '-w', dump_file]
         command = [tshark, '-I', '-i', adapter, '-a',
                    'duration:' + scantime, '-w', dump_file, '-f',
-                   probe_filter]
+                   capture_filter]
         if verbose:
             print(' '.join(command))
         run_tshark = subprocess.Popen(
@@ -243,7 +241,7 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
             'LG Electronics (Mobile Communications)']
 
     cellphone_people = []
-    count_within_70db = 0;
+    count_within_70db = 0
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     for mac in foundMacs:
         oui_id = 'Not in OUI'
