@@ -144,9 +144,13 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
             t1.start()
 
         dump_file = '/tmp/tshark-temp'
+        probe_filter = 'type mgt subtype probe-req'
         # Scan with tshark
+        # command = [tshark, '-I', '-i', adapter, '-a',
+        #            'duration:' + scantime, '-w', dump_file]
         command = [tshark, '-I', '-i', adapter, '-a',
-                   'duration:' + scantime, '-w', dump_file]
+                   'duration:' + scantime, '-w', dump_file, '-f',
+                   probe_filter]
         if verbose:
             print(' '.join(command))
         run_tshark = subprocess.Popen(
