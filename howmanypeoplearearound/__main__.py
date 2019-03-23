@@ -6,6 +6,7 @@ import platform
 import subprocess
 import json
 import time
+import datetime
 
 import netifaces
 import click
@@ -241,6 +242,7 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
             'LG Electronics (Mobile Communications)']
 
     cellphone_people = []
+    count_within_70db = 0;
     for mac in foundMacs:
         oui_id = 'Not in OUI'
         if mac[:8] in oui:
@@ -251,10 +253,14 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
             if not nearby or (nearby and foundMacs[mac] > -70):
                 cellphone_people.append(
                     {'company': oui_id, 'rssi': foundMacs[mac], 'mac': mac})
+            if foundMacs[mac] > -70:
+                count_within_70db += 1
     if sort:
         cellphone_people.sort(key=lambda x: x['rssi'], reverse=True)
     if verbose:
         print(json.dumps(cellphone_people, indent=2))
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        print('count: %s, time: %s' % (count_within_70db, timestamp))
 
     # US / Canada: https://twitter.com/conradhackett/status/701798230619590656
     percentage_of_people_with_phones = 0.7
